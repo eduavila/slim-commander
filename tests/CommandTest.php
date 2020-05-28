@@ -4,6 +4,9 @@ namespace DrewM\SlimCommander;
 
 use PHPUnit\Framework\TestCase;
 
+use DI\ContainerBuilder;
+use Slim\App;
+
 class CommandTest extends TestCase
 {
     protected $settings;
@@ -20,12 +23,21 @@ class CommandTest extends TestCase
             ]
         ];
 
-        $this->app       = new App($this->settings);
-        $this->container = $this->app->getContainer();
+        // Instancia container 
+        // Container PHP-DI 
+        $containerBuilder = new ContainerBuilder();
 
-        $this->container["TestCommand"] = function($c) {
-            return new Command($c);
-        };
+        $containerBuilder->addDefinitions( [
+            // Disponibiliza configurações no container
+            'TestCommand' => function ($c){
+                return new Command($c);
+            }
+        ]);
+
+        $container = $containerBuilder->build();
+        $this->container = $container;
+
+        $this->app = new \DrewM\SlimCommander\App($container);
     }
 
     public function testShouldBeTrue()

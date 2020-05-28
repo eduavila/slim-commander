@@ -1,9 +1,10 @@
-# SlimCommander
+# SlimCommander for Slim v4
 
-A very simple structure for running CLI commands as part of your Slim Framework application.
+A very simple structure for running CLI commands as part of your Slim Framework application v4.
 
 This is not a console tool. It's just a parallel to the HTTP entry point into your application, 
 enabling you to do things like create create scripts to be run as cronjobs or set up basic queue listeners.
+
 
 ## Usage 
 
@@ -14,18 +15,28 @@ require __DIR__ . '/../vendor/autoload.php';
 
 session_start();
 
-// Instantiate the app
-$settings = require __DIR__ . '/../src/settings.php';
-$app = new \Slim\App($settings);
+use DI\ContainerBuilder;
+use Slim\App;
+use SlimFacades\Facade;
 
-// Set up dependencies
-require __DIR__ . '/../src/dependencies.php';
+// Instantiate container 
+// Container PHP-DI 
+$containerBuilder = new ContainerBuilder();
+
+// Definitions PHP-DI
+$containerDefinitions = require __DIR__ .'/container.php';
+
+$containerBuilder->addDefinitions($containerDefinitions);
+
+$container = $containerBuilder->build();
+$app = $container->get(App::class);
 
 // Register middleware
 require __DIR__ . '/../src/middleware.php';
 
 // Register routes
 require __DIR__ . '/../src/routes.php';
+
 
 // Run app
 $app->run();
@@ -35,20 +46,27 @@ You need to create a new PHP script, similar to this, to serve as the entry poin
 It should be outside the `public` folder. Perhaps `src/cli.php`.
 
 ```php
-require __DIR__ . '/../vendor/autoload.php';
 
-// Instantiate the app
-$settings = require __DIR__ . '/settings.php';
-$app = new \DrewM\SlimCommander\App($settings);
+use DI\ContainerBuilder;
 
-// Set up dependencies
-require __DIR__ . '/dependencies.php';
+// Instancia container 
+// Container PHP-DI 
+$containerBuilder = new ContainerBuilder();
 
-// Register commands instead of routes
+// Configura PHP-DI
+$containerDefinitions = require __DIR__ .'/../src/app/container.php';
+
+$containerBuilder->addDefinitions($containerDefinitions);
+$container = $containerBuilder->build();
+
+$app = new \DrewM\SlimCommander\App($container);
+
+// Definições de comandos cli.
 require __DIR__ . '/commands.php';
 
 // Run app
 $app->run($argv);
+
 ```
 
 Instead of routes, you define commands in e.g. `src/commands.php`.
