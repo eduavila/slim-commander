@@ -2,14 +2,15 @@
 
 namespace DrewM\SlimCommander;
 
+use DI\Bridge\Slim\CallableResolver;
+use DI\Container;
 use Psr\Container\ContainerInterface;
-use Slim\Container;
 use InvalidArgumentException;
 use Exception;
 
 class App
 {
-    private $commands = [];
+    public $commands = [];
     private $container;
 
     /**
@@ -19,7 +20,7 @@ class App
      *
      * @throws InvalidArgumentException when no container is provided that implements ContainerInterface
      */
-    public function __construct($container = [])
+    public function __construct(ContainerInterface $container)
     {
         if (is_array($container)) {
             $container = new Container($container);
@@ -69,11 +70,13 @@ class App
     public function run($args)
     {
         list($command, $envArgs) = $this->prepareCommand($args);
-
+      
         if (array_key_exists($command, $this->commands)) {
             $definition  = $this->commands[$command];
             $commandArgs = $this->prepareArgs($definition['args'], $envArgs);
+
             $callable    = $this->resolveCallable($definition['callable']);
+            
             return $this->dispatch($callable, $commandArgs);
         }
 
@@ -137,8 +140,9 @@ class App
      */
     private function resolveCallable($callable)
     {
-        $resolver = $this->container->get('callableResolver');
-        return $resolver->resolve($callable);
+        $callableResolver = new \Slim\CallableResolver($this->container);
+        
+        return $callableResolver->resolve($callable);
     }
 
     /**
