@@ -1,5 +1,5 @@
 {
-  "name": "drewm/slim-commander",
+  "name": "coderlrv/slim-commander",
   "description": "A very simple structure for running CLI commands as part of your Slim Framework application",
   "keywords": ["slim", "cli"],
   "homepage": "http://github.com/drewm/slim-commander",
